@@ -41,11 +41,13 @@ pip install -r requirements.txt
 ### 3) Environment variables
 Create a `.env` file in the root directory of the project and add the following variables:
 ```
-GROQ_API_KEY=your_groq_api_key_here
-DJANGO_DEBUG=True
-ALLOWED_HOSTS=127.0.0.1,localhost
-RAZORPAY_KEY_ID=your_razorpay_key_id_here
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret_here
+DEBUG=True
+SECRET_KEY=django-insecure-)z(gtc5njcycjo_qsv45p=)l06ewqhz1jq^i1isy=a-2ol&6dm
+GROQ_API_KEY=your-GROQ_API_KEY
+DATABASE_URL=sqlite:///db.sqlite3
+REDIS_URL=redis://localhost:6379
+RAZORPAY_KEY_ID=Your-RAZORPAY_KEY_ID
+RAZORPAY_KEY_SECRET=Your-RAZORPAY_KEY_SECRET
 ```
 
 ### 4) Migrations
