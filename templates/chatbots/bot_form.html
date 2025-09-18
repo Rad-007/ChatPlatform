@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px; margin: 0 auto;">
+  <h2>{{ title }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <label for="id_{{ field.name }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div style="font-size:12px; color:#94a3b8;">{{ field.help_text }}</div>{% endif %}
+      {% if field.errors %}<div style="color:#fca5a5; font-size:12px;">{{ field.errors }}</div>{% endif %}
+    {% endfor %}
+    <div class="actions">
+      <button class="btn" type="submit">Save</button>
+      <a class="btn secondary" href="{% url 'chatbots:dashboard' %}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

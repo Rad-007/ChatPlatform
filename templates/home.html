@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Home - Chatbot Platform{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Build and Embed Your Chatbot</h1>
+  <p>Create multiple chatbots, customize their look & behavior, and embed them on any website with a single script tag.</p>
+  {% if user.is_authenticated %}
+    <p><a class="btn" href="/dashboard/">Go to Dashboard</a></p>
+  {% else %}
+    <p>
+      <a class="btn" href="/accounts/register/">Get Started</a>
+      <a class="btn secondary" href="/accounts/login/" style="margin-left:8px;">Login</a>
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

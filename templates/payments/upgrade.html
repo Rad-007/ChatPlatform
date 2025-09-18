@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Upgrade to Pro{% endblock %}
+{% block head %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px; margin:0 auto;">
+  <h2>Upgrade to Pro</h2>
+  <p>Unlock unlimited bots and advanced features. Plan: <strong>Pro Monthly</strong></p>
+  <p>Amount: <strong>{{ amount_display }} {{ currency }}</strong></p>
+
+  {% if not key_id %}
+    <div style="background:#7f1d1d;color:#fecaca;padding:10px;border-radius:8px;margin-bottom:10px;">Razorpay key not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your .env.</div>
+  {% endif %}
+
+  <form id="rzp-verify" action="{% url 'payments:verify' %}" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" />
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id" />
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature" />
+  </form>
+
+  <button class="btn" id="pay-btn">Pay {{ amount_display }}</button>
+  <a class="btn secondary" href="/dashboard/" style="margin-left:8px;">Cancel</a>
+</div>
+
+<script>
+  const options = {
+    key: "{{ key_id }}",
+    amount: {{ order.amount|default:0 }},
+    currency: "{{ currency }}",
+    name: "Chatbot Platform",
+    description: "Pro Monthly Subscription",
+    order_id: "{{ order.id }}",
+    prefill: { name: "{{ user_name|escapejs }}", email: "{{ user_email|escapejs }}" },
+    theme: { color: "#4F46E5" },
+    handler: function (response){
+      document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+      document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+      document.getElementById('razorpay_signature').value = response.razorpay_signature;
+      document.getElementById('rzp-verify').submit();
+    }
+  };
+  document.getElementById('pay-btn').addEventListener('click', function(){
+    if (!"{{ key_id }}") { alert('Razorpay keys not configured'); return; }
+    const rzp = new Razorpay(options);
+    rzp.open();
+  });
+</script>
+{% endblock %}

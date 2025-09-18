@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Chatbot Platform{% endblock %}</title>
+  <style>
+    :root { --primary: #4F46E5; --bg: #0f172a; --card:#111827; --text:#e5e7eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: var(--bg); color: var(--text); }
+    a { color: var(--primary); text-decoration: none; }
+    header { background: #0b1220; border-bottom: 1px solid #1f2937; position: sticky; top:0; z-index:10; }
+    .nav { display:flex; align-items:center; justify-content:space-between; max-width: 1100px; margin:0 auto; padding: 12px 16px; }
+    .nav a.logo { font-weight:700; color:#fff; }
+    .nav .links a { margin-left: 14px; }
+    .container { max-width:1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: var(--card); border:1px solid #1f2937; border-radius: 10px; padding:16px; }
+    .btn { display:inline-block; background: var(--primary); color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor:pointer; }
+    .btn.secondary { background: #334155; }
+    input, select, textarea { width: 100%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:#e5e7eb; }
+    label { display:block; margin: 10px 0 6px; font-size: 14px; color:#cbd5e1; }
+    form .actions { margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #1f2937; text-align:left; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <a href="/" class="logo">🤖 Chatbot Platform</a>
+      <div class="links">
+        {% if user.is_authenticated %}
+          <a href="/dashboard/">Dashboard</a>
+          {% if user.profile.plan == 'free' %}
+            <a href="/payments/upgrade/">Upgrade</a>
+          {% else %}
+            <span title="You're on Pro">Pro</span>
+          {% endif %}
+          <a href="/accounts/logout/">Logout</a>
+        {% else %}
+          <a href="/accounts/login/">Login</a>
+          <a href="/accounts/register/">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

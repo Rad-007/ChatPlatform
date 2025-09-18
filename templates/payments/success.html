@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Payment Successful{% endblock %}
+{% block content %}
+<div class="card" style="max-width:720px; margin:0 auto;">
+  <h2>🎉 Payment Successful</h2>
+  <p>Your subscription has been upgraded to <strong>Pro</strong>.</p>
+  <ul>
+    <li>Order ID: <code>{{ order.razorpay_order_id }}</code></li>
+    <li>Payment ID: <code>{{ order.razorpay_payment_id }}</code></li>
+    <li>Status: <strong>{{ order.status }}</strong></li>
+  </ul>
+  <p><a class="btn" href="/dashboard/">Go to Dashboard</a></p>
+</div>
+{% endblock %}

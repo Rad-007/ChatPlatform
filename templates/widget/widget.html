@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ bot.name }} Chatbot</title>
+  <style>
+    :root { --primary: {{ bot.primary_color }}; --bg: #0b1220; --panel:#0f172a; --text:#e5e7eb; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: transparent; }
+    .w { width: 100%; height: 100%; display:flex; align-items: stretch; }
+    .chat { background: var(--panel); color: var(--text); border:1px solid #1f2937; width:100%; height:100%; display:flex; flex-direction:column; }
+    .header { padding:10px 12px; border-bottom:1px solid #1f2937; display:flex; align-items:center; justify-content:space-between; }
+    .title { font-weight:700; }
+    .messages { flex:1; overflow:auto; padding:12px; }
+    .msg { margin-bottom:10px; }
+    .msg.user { text-align:right; }
+    .msg .bubble { display:inline-block; padding:8px 10px; border-radius:10px; max-width: 85%; }
+    .msg.user .bubble { background: #1d4ed8; }
+    .msg.assistant .bubble { background: #334155; text-align:left; }
+    .input { display:flex; gap:6px; padding:10px; border-top:1px solid #1f2937; }
+    input[type=text] { flex:1; padding:10px; border-radius:8px; border:1px solid #334155; background:#0b1220; color:#e5e7eb; }
+    button { background: var(--primary); color:#fff; border:none; border-radius:8px; padding:10px 12px; cursor:pointer; }
+    .footer { font-size: 11px; color:#94a3b8; padding:6px 12px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="w">
+    <div class="chat">
+      <div class="header">
+        <div class="title">{{ bot.name }}</div>
+        <div style="font-size:12px; color:#94a3b8;">Powered by Chatbot Platform</div>
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="input">
+        <input id="msg" type="text" placeholder="Type your message..." />
+        <button id="send">Send</button>
+      </div>
+      <div class="footer">{{ bot.welcome_message }}</div>
+    </div>
+  </div>
+
+  <script>
+    const BOT_TOKEN = "{{ bot.token }}";
+    const ORIGIN = window.location.origin;
+    const SESSION_ID = (() => {
+      try {
+        const key = 'cbp_session_' + BOT_TOKEN;
+        let v = localStorage.getItem(key);
+        if (!v) { v = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(key, v); }
+        return v;
+      } catch (e) {
+        return (Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0,16);
+      }
+    })();
+
+    const list = document.getElementById('messages');
+    const input = document.getElementById('msg');
+    const btn = document.getElementById('send');
+
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      b.textContent = text;
+      div.appendChild(b);
+      list.appendChild(div);
+      list.scrollTop = list.scrollHeight;
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(ORIGIN + '/api/history/' + BOT_TOKEN + '/?session_id=' + encodeURIComponent(SESSION_ID));
+        const data = await res.json();
+        (data.messages || []).forEach(m => {
+          const role = m.role === 'user' ? 'user' : 'assistant';
+          addMessage(role, m.content);
+        });
+      } catch (e) {
+        // silently ignore
+      }
+    }
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMessage('user', text);
+      // Prepare assistant bubble for streaming
+      addMessage('assistant', '');
+      const last = list.lastChild.querySelector('.bubble');
+      let acc = '';
+
+      // First create the conversation message without generating reply
+      fetch(ORIGIN + '/api/send/' + BOT_TOKEN + '/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, session_id: SESSION_ID, no_answer: true })
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('Send failed');
+        // Start SSE streaming for the response
+        const ev = new EventSource(ORIGIN + '/api/stream/' + BOT_TOKEN + '/?session_id=' + encodeURIComponent(SESSION_ID));
+        ev.onmessage = (e) => {
+          try {
+            const d = JSON.parse(e.data);
+            if (d.delta) { acc += d.delta; last.textContent = acc; }
+            if (d.done) { ev.close(); }
+          } catch (_) {}
+        };
+        ev.onerror = () => { ev.close(); };
+      })
+      .catch(err => {
+        last.textContent = 'Error: ' + err;
+      });
+    }
+
+    btn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // Streaming is now enabled by default via SSE after sending each message.
+    // Load history on startup
+    loadHistory();
+  </script>
+</body>
+</html>

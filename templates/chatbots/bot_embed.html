@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Embed Snippet{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Embed Your Chatbot</h2>
+  <p>Add this script tag to your website's HTML, just before the closing <code>&lt;/body&gt;</code> tag.</p>
+  <pre style="background:#0b1220; padding:12px; border-radius:8px; overflow:auto;">{{ snippet|escape }}</pre>
+  <p>Token: <code>{{ bot.token }}</code></p>
+  <p>Preview: <a class="btn" href="/widget/b/{{ bot.token }}/" target="_blank">Open Widget</a></p>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <h3>Analytics for {{ bot.name }}</h3>
+  <p>Conversations: <strong>{{ conversation_count }}</strong> · Messages: <strong>{{ message_count }}</strong></p>
+  <h4 style="margin-top:8px;">Recent Conversations</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Started</th>
+        <th>Last Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in recent_conversations %}
+      <tr>
+        <td>#{{ c.id }}</td>
+        <td>{{ c.started_at }}</td>
+        <td>
+          {% with lm=c.messages.last %}
+            {% if lm %}{{ lm.role }}: {{ lm.content|truncatechars:60 }}{% else %}-{% endif %}
+          {% endwith %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">No conversations yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:#94a3b8;">Tip: open the widget and start chatting to populate analytics.</p>
+  <p><a class="btn" href="/dashboard/">Back to Dashboard</a></p>
+  
+</div>
+{% endblock %}

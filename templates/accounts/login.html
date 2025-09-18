@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="card" style="max-width:420px; margin: 0 auto;">
+  <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label for="id_{{ field.name }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div style="color:#fca5a5; font-size:12px;">{{ field.errors }}</div>{% endif %}
+    {% endfor %}
+    <div class="actions">
+      <button class="btn" type="submit">Login</button>
+    </div>
+  </form>
+  <p style="margin-top:10px;">No account? <a href="/accounts/register/">Register</a></p>
+</div>
+{% endblock %}

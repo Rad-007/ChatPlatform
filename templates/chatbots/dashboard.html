@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="card">
+  <div style="display:flex; justify-content: space-between; align-items:center;">
+    <h2>Your Chatbots</h2>
+    <a class="btn" href="{% url 'chatbots:bot_create' %}">Create Bot</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Token</th>
+        <th>Active</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bot in bots %}
+      <tr>
+        <td>{{ bot.name }}</td>
+        <td style="font-family: monospace;">{{ bot.token|slice:":10" }}...</td>
+        <td>{{ bot.is_active|yesno:"Yes,No" }}</td>
+        <td>
+          <a href="{% url 'chatbots:bot_edit' bot.pk %}">Edit</a>
+          · <a href="{% url 'chatbots:bot_embed' bot.pk %}">Embed</a>
+          · <a href="{% url 'chatbots:bot_delete' bot.pk %}">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No bots yet. Create your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
